@@ -59,14 +59,22 @@ class XMLLoader:
             columns=header
         )
 
-        for col in df.columns:
+        for c in df.columns:
+            s = (
+                df[c]
+                .replace({
+                    "true": 1,
+                    "false": 0,
+                    "True": 1,
+                    "False": 0,
+                })
+            )
 
-            try:
-                df[col] = pd.to_numeric(df[col])
+            numeric = pd.to_numeric(s, errors="coerce")
 
-            except Exception:
-                pass
-
-        print(f"Rows: {len(df):,}")
+            if numeric.notna().sum() == len(s):
+                df[c] = numeric
+            else:
+                df[c] = s
 
         return df
