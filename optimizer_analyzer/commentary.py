@@ -65,6 +65,20 @@ def _edges(p, low, high, lo, hi, step):
     return out
 
 
+# red (min) -> light yellow -> dark green (max)
+_RAMP = [(222, 68, 55), (255, 245, 157), (27, 120, 55)]
+
+
+def _heat(value, lo, hi, text):
+    """Table cell coloured by where value sits between lo (red) and hi (dark green)."""
+    t = 0.5 if hi <= lo else min(max((value - lo) / (hi - lo), 0), 1)
+    a, b, f = (_RAMP[0], _RAMP[1], t * 2) if t < 0.5 else (_RAMP[1], _RAMP[2], t * 2 - 1)
+    rgb = [round(x + (y - x) * f) for x, y in zip(a, b)]
+    fg = "#fff" if 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2] < 140 else "#000"
+    return (f"<div style='background:rgb{tuple(rgb)};color:{fg};margin:-5px -8px;"
+            f"padding:5px 8px'>{text}</div>")
+
+
 def _best(r):
     best = r["summary"].iloc[0]
     sub = r["stable"][r["stable"]["Cluster"] == int(best["Cluster"])]
@@ -365,12 +379,12 @@ def top_sets_html(r, n=15):
 
         # key results first, then the remaining metrics, parameters, comment last
         row = {
+            "Score": _fmt(x["FinalScore"], 3),
+            "Cluster": int(x["Cluster"]) if "Cluster" in x and pd.notna(x["Cluster"]) else "—",
             "Số lệnh": f"{int(x['Trades'])}" if "Trades" in x and pd.notna(x["Trades"]) else "—",
             "Sharpe": num("Sharpe Ratio"),
             "PF": num("Profit Factor"),
             "Forward": _fmt(x["Forward Result"], 1),
-            "Score": _fmt(x["FinalScore"], 3),
-            "Cluster": int(x["Cluster"]) if "Cluster" in x and pd.notna(x["Cluster"]) else "—",
             "Back": _fmt(x["Back Result"], 1),
             "Gap tương đối": _fmt(g, 2),
             "DD %": num("Equity DD %", 1),
@@ -378,6 +392,15 @@ def top_sets_html(r, n=15):
         row.update({p: f"{x[p]:g}" for p in r["parameters"]})
         row["Nhận xét"] = "; ".join(cm)
         rows.append(row)
+
+    # heat-map the three quality columns across the listed sets
+    for col, src in (("Số lệnh", "Trades"), ("Sharpe", "Sharpe Ratio"), ("PF", "Profit Factor")):
+        if src not in pool.columns or pool[src].isna().all():
+            continue
+        lo, hi = pool[src].min(), pool[src].max()
+        for row, v in zip(rows, pool[src]):
+            if pd.notna(v):
+                row[col] = _heat(v, lo, hi, row[col])
     return ("<h2>6. Các bộ tham số tốt nhất</h2>"
             + _box("Cách đọc", "<p>Top theo FinalScore trong tập Stable + Elite. "
                    "Dùng để kiểm tra từng set cụ thể; khuyến nghị nên dựa vào range của "
