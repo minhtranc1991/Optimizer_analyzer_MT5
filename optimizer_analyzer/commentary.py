@@ -360,13 +360,23 @@ def top_sets_html(r, n=15):
             cm.append("ít lệnh")
         if x.get("Equity DD %", 0) > 30:
             cm.append(f"DD cao ({x['Equity DD %']:.0f}%)")
-        row = {p: f"{x[p]:g}" for p in r["parameters"]}
-        row.update({
-            "Forward": _fmt(x["Forward Result"], 1), "Back": _fmt(x["Back Result"], 1),
-            "Gap tương đối": _fmt(g, 2), "Score": _fmt(x["FinalScore"], 3),
+        def num(col, d=2):
+            return _fmt(x[col], d) if col in x and pd.notna(x[col]) else "—"
+
+        # key results first, then the remaining metrics, parameters, comment last
+        row = {
+            "Số lệnh": f"{int(x['Trades'])}" if "Trades" in x and pd.notna(x["Trades"]) else "—",
+            "Sharpe": num("Sharpe Ratio"),
+            "PF": num("Profit Factor"),
+            "Forward": _fmt(x["Forward Result"], 1),
+            "Score": _fmt(x["FinalScore"], 3),
             "Cluster": int(x["Cluster"]) if "Cluster" in x and pd.notna(x["Cluster"]) else "—",
-            "Nhận xét": "; ".join(cm),
-        })
+            "Back": _fmt(x["Back Result"], 1),
+            "Gap tương đối": _fmt(g, 2),
+            "DD %": num("Equity DD %", 1),
+        }
+        row.update({p: f"{x[p]:g}" for p in r["parameters"]})
+        row["Nhận xét"] = "; ".join(cm)
         rows.append(row)
     return ("<h2>6. Các bộ tham số tốt nhất</h2>"
             + _box("Cách đọc", "<p>Top theo FinalScore trong tập Stable + Elite. "
