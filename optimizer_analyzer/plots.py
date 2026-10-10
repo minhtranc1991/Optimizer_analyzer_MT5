@@ -6,6 +6,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from . import commentary as C
+
 HOVER = ["FinalScore", "Trades", "Sharpe Ratio", "Profit Factor", "Equity DD %"]
 
 
@@ -91,15 +93,42 @@ def _profiles(r):
     return fig
 
 
+CSS = """
+body{font-family:Segoe UI,Arial,sans-serif;max-width:1200px;margin:24px auto;padding:0 16px;color:#222;line-height:1.5}
+h1{margin-bottom:0} h2{margin-top:40px;border-bottom:2px solid #ddd;padding-bottom:4px}
+.note,.good,.warn{padding:10px 14px;margin:10px 0;border-left:4px solid;border-radius:3px}
+.note{background:#eef4fb;border-color:#1f77b4} .good{background:#eaf6ea;border-color:#2ca02c}
+.warn{background:#fff4e0;border-color:#ff9800} .note ul,.good ul,.warn ul{margin:6px 0 0 18px;padding:0}
+table.t{border-collapse:collapse;font-size:13px;width:100%;margin:10px 0}
+table.t th{background:#f0f0f0;text-align:left} table.t td,table.t th{border:1px solid #ddd;padding:5px 8px;vertical-align:top}
+"""
+
+
+def _figure_block(title, help_key, note, fig, first=False):
+    return (f"<h3>{title}</h3>" + C._box("Cách đọc", f"<p>{C.FIGURE_HELP[help_key]}</p>") + note
+            # plotly.js is embedded once so the file works offline
+            + fig.to_html(full_html=False, include_plotlyjs=first))
+
+
 def write_html_report(result, path, title=""):
-    figs = [_scatter_fwd_back(result), _importance(result), _pair_map(result),
-            _profiles(result), _cluster_box(result), _parallel(result)]
-    parts = [
-        f"<h1 style='font-family:sans-serif'>{title}</h1>",
-        # plotly.js is embedded once so the file works offline
-        *(f.to_html(full_html=False, include_plotlyjs=True if i == 0 else False)
-          for i, f in enumerate(figs)),
+    r = result
+    charts = [
+        _figure_block("Forward vs Back", "fwd_back", C.fwd_back_note(r), _scatter_fwd_back(r), first=True),
+        _figure_block("Độ quan trọng của tham số", "importance", C.importance_note(r), _importance(r)),
+        _figure_block("Bản đồ hai tham số quan trọng nhất", "pair", C.pair_note(r), _pair_map(r)),
+        _figure_block("Điểm số theo từng tham số", "profiles", C.profiles_note(r), _profiles(r)),
+        _figure_block("Forward theo cluster", "box", C.box_note(r), _cluster_box(r)),
+        _figure_block("Parallel coordinates", "parallel", "", _parallel(r)),
+    ]
+    body = [
+        f"<h1>{title}</h1>",
+        C.summary_html(r),
+        C.parameters_html(r),
+        "<h2>3. Biểu đồ</h2>", *charts,
+        C.clusters_html(r),
+        C.recommendation_html(r),
+        C.top_sets_html(r),
     ]
     with open(path, "w", encoding="utf-8") as fh:
-        fh.write("<html><head><meta charset='utf-8'><title>" + title + "</title></head><body>")
-        fh.write("\n".join(parts) + "</body></html>")
+        fh.write(f"<html><head><meta charset='utf-8'><title>{title}</title><style>{CSS}</style></head><body>")
+        fh.write("\n".join(body) + "</body></html>")

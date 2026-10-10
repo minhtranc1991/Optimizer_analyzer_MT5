@@ -33,7 +33,8 @@ class _Tee(io.TextIOBase):
 
 def _analyse(xml_file):
     print(f"Loading {xml_file}")
-    df = prefilter(build_features(load_report(xml_file)))
+    raw = build_features(load_report(xml_file))
+    df = prefilter(raw)
 
     # Importance first, on the full set: independent of the stability filter.
     profit_imp, cons_imp = importance_report(df)
@@ -53,7 +54,7 @@ def _analyse(xml_file):
     return {
         "full": df, "stable": stable, "elite": elite, "parameters": parameters,
         "profit_importance": profit_imp, "consistency_importance": cons_imp,
-        "summary": summary, "ranges": ranges,
+        "summary": summary, "ranges": ranges, "n_raw": len(raw),
     }
 
 
