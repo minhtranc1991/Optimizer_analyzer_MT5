@@ -48,7 +48,7 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-python -m optimizer_analyzer data/ML_18_07_2026_06_07.xml
+python -m optimizer_analyzer data/ML_XAU_M5_2026-06-01_fwd1-4_07-31_r02.xml
 ```
 
 Writes `output/<name>_ranges.csv` and `output/<name>_stable.csv`.
@@ -60,3 +60,12 @@ All tunables live in `optimizer_analyzer/config.py`
 ```bash
 python -m pytest tests
 ```
+
+## Data file naming
+
+`<EA>_<SYMBOL>_<TF>_<start YYYY-MM-DD>_<fwd>_<end>_r<NN>.xml`, for example
+`AMFS_v2_XAU_M5_2026-08-03_fwd1-4_10-03_r01.xml`.
+
+- `end` is `MM-DD` of the start year, or full `YYYY-MM-DD` when the period crosses a year.
+- Files exported with only a year/month range use the first/last day of that range.
+- `unk` = unknown. `rNN` orders runs with the same EA and period.
