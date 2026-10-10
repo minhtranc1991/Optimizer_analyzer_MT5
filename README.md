@@ -25,9 +25,10 @@ Python utility for analyzing MetaTrader 5 (MT5) optimization reports exported as
 ## Layout
 
 ```
+main.py               entry point
 optimizer_analyzer/   package (loader, features, importance, selection, scoring,
                       filtering, neighbourhood, clustering, cluster_summary,
-                      ranges, recommend, report, cli, config)
+                      ranges, recommend, report, plots, pipeline, config)
 data/                 MT5 optimization XML exports
 output/               generated CSVs (git-ignored)
 scripts/              check_mt5_connection.py (needs MetaTrader5)
@@ -48,10 +49,12 @@ pip install -r requirements.txt
 ## Usage
 
 ```bash
-python -m optimizer_analyzer data/ML_XAU_M5_2026-06-01_fwd1-4_07-31_r02.xml
+python main.py data/ML_XAU_M5_2026-06-01_fwd1-4_07-31_r02.xml
 ```
 
-Writes `output/<name>_ranges.csv` and `output/<name>_stable.csv`.
+With no argument it analyses the newest XML in `data/`. Output in `output/`:
+`<name>_report.txt` (full console report), `_report.html` (interactive Plotly charts,
+offline), `_ranges.csv`, `_stable.csv`, `_clusters.csv`.
 All tunables live in `optimizer_analyzer/config.py`
 (`SELECT_MODE`: median | cumulative | relative | top_n | all).
 

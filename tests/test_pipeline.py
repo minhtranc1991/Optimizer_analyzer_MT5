@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from optimizer_analyzer.cli import run  # noqa: E402
+from optimizer_analyzer.pipeline import run  # noqa: E402
 from optimizer_analyzer.features import build_features  # noqa: E402
 
 
@@ -31,11 +31,12 @@ def test_quality_ranks_high_sharpe_pf_first():
 
 
 def test_pipeline_runs_and_writes_ranges(tmp_path, monkeypatch):
-    import optimizer_analyzer.cli as cli
+    import optimizer_analyzer.pipeline as cli
     monkeypatch.setattr(cli, "load_report", lambda _: synthetic())
-    ranges = run("fake.xml", tmp_path)
+    ranges = run("fake.xml", tmp_path)["ranges"]
     assert (ranges["Low"] <= ranges["High"]).all()
     assert (tmp_path / "fake_ranges.csv").exists()
+    assert (tmp_path / "fake_report.html").exists() and (tmp_path / "fake_report.txt").exists()
 
 
 if __name__ == "__main__":
