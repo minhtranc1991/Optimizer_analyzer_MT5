@@ -81,5 +81,5 @@ def run(xml_file, output_dir="output"):
     result["summary"].to_csv(run_dir / "clusters.csv", index=False)
     write_html_report(result, out / f"{stem}_report.html", title=stem)
 
-    print(f"\nSaved to {out.resolve()}: {stem}_report.txt/.html, _ranges/_stable/_clusters.csv")
+    print(f"\nReport   : {out / (stem + '_report.html')}\nRun files: {run_dir}")
     return result
