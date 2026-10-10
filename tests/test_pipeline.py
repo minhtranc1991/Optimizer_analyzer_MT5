@@ -35,8 +35,8 @@ def test_pipeline_runs_and_writes_ranges(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, "load_report", lambda _: synthetic())
     ranges = run("fake.xml", tmp_path)["ranges"]
     assert (ranges["Low"] <= ranges["High"]).all()
-    assert (tmp_path / "fake_ranges.csv").exists()
-    assert (tmp_path / "fake_report.html").exists() and (tmp_path / "fake_report.txt").exists()
+    assert (tmp_path / "fake" / "ranges.csv").exists()
+    assert (tmp_path / "fake_report.html").exists() and (tmp_path / "fake" / "report.txt").exists()
 
 
 if __name__ == "__main__":
