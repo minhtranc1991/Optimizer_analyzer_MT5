@@ -52,11 +52,13 @@ pip install -r requirements.txt
 python main.py data/ML_XAU_M5_2026-06-01_fwd1-4_07-31_r02.xml
 ```
 
-With no argument it analyses the newest XML in `data/`. Output in `output/`:
-`<name>_report.txt` (full console report), `_report.html` (interactive Plotly charts,
-offline), `_ranges.csv`, `_stable.csv`, `_clusters.csv`.
-All tunables live in `optimizer_analyzer/config.py`
-(`SELECT_MODE`: median | cumulative | relative | top_n | all).
+With no argument it analyses the newest XML in `data/`. Output:
+
+```
+output/<name>_report.html     interactive charts + commentary (open this)
+output/<name>/report.txt      full console report
+output/<name>/ranges.csv  stable.csv  clusters.csv
+```
 
 ## Tests
 

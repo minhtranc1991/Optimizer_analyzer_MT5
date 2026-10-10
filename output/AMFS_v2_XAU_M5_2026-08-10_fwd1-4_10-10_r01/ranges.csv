@@ -1,0 +1,6 @@
+Parameter,Low,High,Center,Std,Step
+setSlowMAPeriod,108.0,276.0,198.0,94.95064862897392,12.0
+setEntryScoreBuy,47.0,55.0,51.0,4.792554591923358,1.0
+setEntryScoreSell,51.0,57.0,54.0,3.7790098537276817,1.0
+setLimitATR,0.5,1.5,1.0,0.4873451804659505,0.5
+setMaxPositions,1.0,1.5,1.0,0.0,1.0

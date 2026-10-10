@@ -63,9 +63,10 @@ def run(xml_file, output_dir="output"):
     pd.set_option("display.max_columns", None)
     pd.set_option("display.width", None)
 
-    out = Path(output_dir)
-    out.mkdir(exist_ok=True)
     stem = Path(xml_file).stem
+    out = Path(output_dir)            # only <stem>_report.html lives here
+    run_dir = out / stem              # everything else for this run
+    run_dir.mkdir(parents=True, exist_ok=True)
 
     buf = io.StringIO()
     result = None
@@ -73,11 +74,11 @@ def run(xml_file, output_dir="output"):
         with contextlib.redirect_stdout(_Tee(sys.stdout, buf)):
             result = _analyse(xml_file)
     finally:  # keep the partial report even if a step crashed
-        (out / f"{stem}_report.txt").write_text(buf.getvalue(), encoding="utf-8")
+        (run_dir / "report.txt").write_text(buf.getvalue(), encoding="utf-8")
 
-    result["ranges"].to_csv(out / f"{stem}_ranges.csv", index=False)
-    result["stable"].to_csv(out / f"{stem}_stable.csv", index=False)
-    result["summary"].to_csv(out / f"{stem}_clusters.csv", index=False)
+    result["ranges"].to_csv(run_dir / "ranges.csv", index=False)
+    result["stable"].to_csv(run_dir / "stable.csv", index=False)
+    result["summary"].to_csv(run_dir / "clusters.csv", index=False)
     write_html_report(result, out / f"{stem}_report.html", title=stem)
 
     print(f"\nSaved to {out.resolve()}: {stem}_report.txt/.html, _ranges/_stable/_clusters.csv")
