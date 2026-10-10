@@ -16,7 +16,7 @@ from .neighbourhood import analyse_neighbourhood
 from .plots import write_html_report
 from .ranges import print_ranges
 from .recommend import build_recommendation
-from .report import print_elite, print_top_stable
+from .report import print_elite, print_run_summary, print_top_stable
 from .scoring import build_score
 from .selection import select_parameters
 
@@ -58,8 +58,11 @@ def _analyse(xml_file):
     }
 
 
-def run(xml_file, output_dir="output"):
-    """Run the whole flow, then save text report, CSVs and the HTML charts."""
+def run(xml_file, output_dir="output", verbose=False):
+    """Run the whole flow, then save text report, CSVs and the HTML charts.
+
+    The console shows a short summary; verbose=True also streams the full report.
+    """
     pd.set_option("display.max_columns", None)
     pd.set_option("display.width", None)
 
@@ -71,7 +74,7 @@ def run(xml_file, output_dir="output"):
     buf = io.StringIO()
     result = None
     try:
-        with contextlib.redirect_stdout(_Tee(sys.stdout, buf)):
+        with contextlib.redirect_stdout(_Tee(sys.stdout, buf) if verbose else buf):
             result = _analyse(xml_file)
     finally:  # keep the partial report even if a step crashed
         (run_dir / "report.txt").write_text(buf.getvalue(), encoding="utf-8")
@@ -81,5 +84,5 @@ def run(xml_file, output_dir="output"):
     result["summary"].to_csv(run_dir / "clusters.csv", index=False)
     write_html_report(result, out / f"{stem}_report.html", title=stem)
 
-    print(f"\nReport   : {out / (stem + '_report.html')}\nRun files: {run_dir}")
+    print_run_summary(result, xml_file, out / f"{stem}_report.html", run_dir)
     return result

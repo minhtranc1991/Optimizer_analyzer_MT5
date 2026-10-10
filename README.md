@@ -17,7 +17,11 @@ pip install -r requirements.txt
 
 python main.py                   # file XML mới nhất trong data/
 python main.py data/a.xml data/b.xml
+python main.py -v                # in cả report đầy đủ ra console
 ```
+
+Mặc định console chỉ in tóm tắt (số set, tham số được chọn, cluster tốt nhất, range
+khuyến nghị, cảnh báo). Chi tiết nằm trong `report.txt` và report HTML.
 
 Mở file `output/<tên>_report.html` bằng trình duyệt (xem được khi offline).
 
