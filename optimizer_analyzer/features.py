@@ -3,7 +3,6 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 REQUIRED = ["Forward Result", "Back Result"]
-EPS = 1e-6
 
 
 def parameter_columns(df):
@@ -29,8 +28,8 @@ def build_features(df):
     else:
         df["DDScore"] = 1.0
 
-    # Rewards high Sharpe/PF. Temporary formula requested by the user.
+    # Rewards high Sharpe/PF on consistent sets. Temporary formula.
     sharpe = df.get("Sharpe Ratio", 0).fillna(0)
     pf = df.get("Profit Factor", 1).fillna(1)
-    df["Quality"] = sharpe * pf / df["Consistency"].clip(lower=EPS)
+    df["Quality"] = sharpe * pf * df["Consistency"]
     return df

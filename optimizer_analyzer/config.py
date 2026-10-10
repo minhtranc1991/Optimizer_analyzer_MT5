@@ -22,7 +22,7 @@ class Config:
     W_PROFIT_FACTOR = 0.10
     W_SHARPE = 0.10
     W_CONSISTENCY = 0.05
-    W_QUALITY = 0.10          # Sharpe * PF / Consistency
+    W_QUALITY = 0.10          # Sharpe * PF * Consistency
     W_DRAWDOWN = 0.10
     OUTLIER_CLIP = (0.01, 0.99)   # quantiles clipped before MinMax scaling
 
