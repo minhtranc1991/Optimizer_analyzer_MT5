@@ -18,6 +18,8 @@ def parameter_ranges(sub, full, parameters):
         if high - low < step:  # widen collapsed range around the median
             half = step / 2
             low, high = min(low, s.median() - half), max(high, s.median() + half)
+        # never recommend values outside what was actually tested
+        low, high = max(low, full[p].min()), min(high, full[p].max())
         rows.append({
             "Parameter": p, "Low": low, "High": high,
             "Center": s.median(), "Std": s.std(), "Step": step,

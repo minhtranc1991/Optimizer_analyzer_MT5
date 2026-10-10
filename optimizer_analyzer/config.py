@@ -46,3 +46,9 @@ class Config:
     CS_CONSISTENCY = 0.25
     CS_NEIGHBOUR = 0.25
     CS_SIZE = 0.20
+
+    # Hard limits of a parameter (min, max); None = unbounded. Touching a hard
+    # limit is not a reason to widen the test range.
+    PARAM_BOUNDS = {
+        "setMaxPositions": (1, None),
+    }
