@@ -53,6 +53,18 @@ def _fmt(x, d=2):
     return f"{x:,.{d}f}"
 
 
+def _edges(p, low, high, lo, hi, step):
+    """('lower'/'upper') when the range touches an edge of the tested domain
+    that is NOT a hard limit of the parameter."""
+    hard_lo, hard_hi = Config.PARAM_BOUNDS.get(p, (None, None))
+    out = []
+    if low <= lo + step and high < hi and not (hard_lo is not None and lo <= hard_lo):
+        out.append("lower")
+    if high >= hi - step and low > lo and not (hard_hi is not None and hi >= hard_hi):
+        out.append("upper")
+    return out
+
+
 def _best(r):
     best = r["summary"].iloc[0]
     sub = r["stable"][r["stable"]["Cluster"] == int(best["Cluster"])]
@@ -225,11 +237,13 @@ def profiles_note(r):
         trend = ("tăng" if rho > 0.15 else "giảm" if rho < -0.15 else "gần như không đổi")
         lo, hi = df[p].min(), df[p].max()
         edge = ""
-        step = rg.loc[p, "Step"]
-        if rg.loc[p, "High"] >= hi - step and rg.loc[p, "Low"] > lo:
+        flags = _edges(p, rg.loc[p, "Low"], rg.loc[p, "High"], lo, hi, rg.loc[p, "Step"])
+        if "upper" in flags:
             edge = " Range chạm <b>biên trên</b> của vùng đã test: nên mở rộng dải test lên cao hơn."
-        elif rg.loc[p, "Low"] <= lo + step and rg.loc[p, "High"] < hi:
+        elif "lower" in flags:
             edge = " Range chạm <b>biên dưới</b> của vùng đã test: nên mở rộng dải test xuống thấp hơn."
+        elif Config.PARAM_BOUNDS.get(p, (None, None))[0] is not None and rg.loc[p, "Low"] <= Config.PARAM_BOUNDS[p][0]:
+            edge = f" Range đã ở giới hạn tối thiểu của tham số ({Config.PARAM_BOUNDS[p][0]:g}), không cần mở rộng."
         width = (rg.loc[p, "High"] - rg.loc[p, "Low"]) / (hi - lo) if hi > lo else 0
         items.append(
             f"<b>{p}</b>: giá trị cao hơn thì điểm {trend} (Spearman {rho:+.2f}). "
@@ -296,10 +310,11 @@ def recommendation_html(r):
             cm.append("range hẹp: đã hội tụ")
         elif width > 0.6:
             cm.append("range rộng: tham số ít nhạy trong cluster này")
-        if x.High >= hi - x.Step and x.Low > lo:
+        flags = _edges(x.Parameter, x.Low, x.High, lo, hi, x.Step)
+        if "upper" in flags:
             cm.append("chạm biên trên của vùng test")
             warns.append(f"{x.Parameter}: mở rộng dải test lên trên {hi:g}.")
-        if x.Low <= lo + x.Step and x.High < hi:
+        if "lower" in flags:
             cm.append("chạm biên dưới của vùng test")
             warns.append(f"{x.Parameter}: mở rộng dải test xuống dưới {lo:g}.")
         rows.append({
