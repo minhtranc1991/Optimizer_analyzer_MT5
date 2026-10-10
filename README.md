@@ -22,125 +22,41 @@ Python utility for analyzing MetaTrader 5 (MT5) optimization reports exported as
 
 ---
 
-## Requirements
+## Layout
 
-- Python 3.8+
-- pandas
-- scikit-learn
-
----
-
-## Installation
-
-```bash
-python -m venv venv
+```
+optimizer_analyzer/   package (loader, features, importance, selection, scoring,
+                      filtering, neighbourhood, clustering, cluster_summary,
+                      ranges, recommend, report, cli, config)
+data/                 MT5 optimization XML exports
+output/               generated CSVs (git-ignored)
+scripts/              check_mt5_connection.py (needs MetaTrader5)
+tests/                smoke tests
 ```
 
-Activate the environment.
+Pipeline order: load -> features -> pre-filter -> importance -> parameter
+selection -> score -> stability filter (+ elite list) -> neighbourhood ->
+clustering -> ranges -> recommendation.
 
-Windows
-
-```bash
-venv\Scripts\activate
-```
-
-Install dependencies.
+## Install
 
 ```bash
-pip install pandas scikit-learn
+python -m venv venv && venv\Scriptsctivate
+pip install -r requirements.txt
 ```
-
----
 
 ## Usage
 
-Run
+```bash
+python -m optimizer_analyzer data/ML_18_07_2026_06_07.xml
+```
+
+Writes `output/<name>_ranges.csv` and `output/<name>_stable.csv`.
+All tunables live in `optimizer_analyzer/config.py`
+(`SELECT_MODE`: median | cumulative | relative | top_n | all).
+
+## Tests
 
 ```bash
-python report_optimizer.py
+python -m pytest tests
 ```
-
-By default the program loads
-
-```text
-ReportOptimizer-2020-2024.xml
-```
-
-To change the input file:
-
-```python
-if __name__ == "__main__":
-    main("ReportOptimizer-2021-2025.xml")
-```
-
----
-
-## Project Structure
-
-```
-.
-├── report_optimizer.py
-├── config.py
-├── xml_loader.py
-├── feature_engineer.py
-├── score_engine.py
-├── stability_filter.py
-├── shap_analyzer.py
-├── feature_selector.py
-├── neighbourhood_analyzer.py
-├── cluster_analyzer.py
-├── cluster_summary.py
-├── range_detector.py
-└── recommendation_engine.py
-```
-
-### Modules
-
-| File | Description |
-|------|-------------|
-| report_optimizer.py | Main entry point |
-| config.py | Configuration |
-| xml_loader.py | XML parser |
-| feature_engineer.py | Feature engineering |
-| score_engine.py | Final score calculation |
-| stability_filter.py | Stable solution filtering |
-| shap_analyzer.py | RandomForest feature importance |
-| feature_selector.py | Parameter selection |
-| neighbourhood_analyzer.py | Local neighbourhood analysis |
-| cluster_analyzer.py | KMeans clustering |
-| cluster_summary.py | Cluster statistics |
-| range_detector.py | Recommended parameter ranges |
-| recommendation_engine.py | Final recommendation |
-
----
-
-## Sample XML Files
-
-```
-ReportOptimizer-2005-2009.xml
-ReportOptimizer-2006-2010.xml
-ReportOptimizer-2007-2011.xml
-ReportOptimizer-2020-2024.xml
-ReportOptimizer-2021-2025.xml
-ReportOptimizer-2022-2026.xml
-ReportOptimizer-2148302.xml
-ReportOptimizer-RM.xml
-```
-
----
-
-## Notes
-
-- MT5 optimization reports must be exported as Spreadsheet XML.
-- If `Equity DD %` is unavailable, `DDScore` defaults to `1`.
-- Important parameters are selected using the configured median threshold.
-
----
-
-## Roadmap
-
-- [ ] Command-line arguments
-- [ ] CSV / Excel export
-- [ ] Real SHAP support
-- [ ] Visualization
-- [ ] HTML report

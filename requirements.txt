@@ -1,0 +1,5 @@
+pandas
+numpy
+scikit-learn
+# scripts/check_mt5_connection.py only:
+MetaTrader5
